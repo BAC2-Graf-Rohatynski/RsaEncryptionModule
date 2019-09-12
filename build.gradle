@@ -1,0 +1,88 @@
+buildscript {
+    ext {
+        kotlinVersion = '1.2.51'
+        dokkaVersion = '0.9.17'
+    }
+    repositories {
+        mavenLocal()
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:${kotlinVersion}")
+        classpath("org.jetbrains.kotlin:kotlin-allopen:${kotlinVersion}")
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokkaVersion}"
+    }
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'org.jetbrains.dokka'
+
+group = 'rsa'
+version = '1.0.0'
+sourceCompatibility = 1.8
+def changes = 'ENTER CHANGES HERE'
+
+jar {
+    // This line of code recursively collects and copies all of a project's files
+    // and adds them to the JAR itself. One can extend this task, to skip certain 
+    // files or particular types at will
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
+compileKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        freeCompilerArgs = ["-Xjsr305=strict"]
+        jvmTarget = "1.8"
+    }
+}
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+    jcenter()
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "$buildDir/javadoc"
+}
+
+task updateVersion() {
+    Properties props = new Properties()
+    File propsFile = new File('.\\src\\main\\resources\\update.properties')
+    props.load(propsFile.newDataInputStream())
+    props.setProperty('Rsa.version', version.toString())
+    props.setProperty('Rsa.changes', changes.toString())
+    props.setProperty('Rsa.update', true.toString())
+    props.store(propsFile.newWriter(), null)
+}
+
+dependencies {
+    compile('org.jetbrains.kotlin:kotlin-stdlib-jdk8')
+    compile('org.jetbrains.kotlin:kotlin-reflect')
+    compile group: 'commons-io', name: 'commons-io', version: '2.6'
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-reflect', version: '1.2.71'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.2.71'
+    compile group: 'org.jetbrains', name: 'annotations', version: '16.0.3'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib-common', version: '1.2.71'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-test-common', version: '1.2.71'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-test-annotations-common', version: '1.2.71'
+    compile group: 'org.jetbrains.kotlin', name: 'kotlin-stdlib', version: '1.2.71'
+    compile group: 'org.json', name: 'json', version: '20180813'
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    compile name: 'PropertyStorage'
+    compile name: 'EnumStorage'
+}
